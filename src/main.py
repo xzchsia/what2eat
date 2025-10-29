@@ -20,11 +20,13 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+# 注册全局异常处理
 register_exception_handlers(app)
 
 # 注册 FastAPI-Users 路由
 register_fastapi_users_routes(app, fastapi_users)
 
+# 引入菜品路由
 app.include_router(dishes_router)
 
 # 路由引入

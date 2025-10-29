@@ -7,10 +7,14 @@ from redis.asyncio import Redis
 from fastapi_users import BaseUserManager, FastAPIUsers, UUIDIDMixin
 from fastapi_users.authentication import (
     AuthenticationBackend,
-    BearerTransport,    
-    RedisStrategy    
+    BearerTransport,
+    CookieTransport,
+    RedisStrategy,
 )
-from fastapi_users.authentication.strategy.db import AccessTokenDatabase,DatabaseStrategy
+from fastapi_users.authentication.strategy.db import (
+    AccessTokenDatabase,
+    DatabaseStrategy,
+)
 from fastapi_users.db import SQLAlchemyUserDatabase
 from src.core.config import settings
 from src.core.redis_db import get_auth_redis
@@ -29,7 +33,6 @@ class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):
 
     async def on_after_register(self, user: User, request: Optional[Request] = None):
         print(f"User {user.id} has registered.")
-        
 
     async def on_after_forgot_password(
         self, user: User, token: str, request: Optional[Request] = None
@@ -46,7 +49,12 @@ async def get_user_manager(user_db: SQLAlchemyUserDatabase = Depends(get_user_db
     yield UserManager(user_db)
 
 
-bearer_transport = BearerTransport(tokenUrl="auth/login")
+# cookie 传输方式
+cookie_transport = CookieTransport(cookie_max_age=3600)
+
+# bearer 传输方式
+bearer_transport = BearerTransport(tokenUrl="auth/jwt/login")
+
 
 # 数据库策略
 def get_database_strategy(
@@ -54,9 +62,11 @@ def get_database_strategy(
 ) -> DatabaseStrategy:
     return DatabaseStrategy(access_token_db, lifetime_seconds=3600)
 
+
 # redis策略
 def get_redis_strategy(auth_redis: Redis = Depends(get_auth_redis)) -> RedisStrategy:
     return RedisStrategy(auth_redis, lifetime_seconds=3600)
+
 
 # 数据库认证后端
 database_auth_backend = AuthenticationBackend(
@@ -69,7 +79,7 @@ database_auth_backend = AuthenticationBackend(
 redis_auth_backend = AuthenticationBackend(
     name="Redis Strategy",
     transport=bearer_transport,
-    get_strategy=get_database_strategy,
+    get_strategy=get_redis_strategy,
 )
 
 

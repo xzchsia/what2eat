@@ -8,8 +8,11 @@ from src.dishes.service import DishService
 from src.dishes.repository import DishRepository
 from src.dishes.schema import DishCreate, DishUpdate, DishResponse
 from src.core.database import get_db
+from src.auth.user_manager import get_current_user, current_superuser
 
-router = APIRouter(prefix="/dishes", tags=["Dishes"])
+router = APIRouter(
+    prefix="/dishes", tags=["Dishes"], dependencies=[Depends(get_current_user)]
+)
 
 
 # 注入仓库 + 服务层
@@ -75,7 +78,11 @@ async def update_dish(
     return dish
 
 
-@router.delete("/{dish_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete(
+    "/{dish_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    dependencies=[Depends(current_superuser)],
+)
 async def delete_dish(
     dish_id: int = Path(..., description="菜品ID"),
     service: DishService = Depends(get_dish_service),
