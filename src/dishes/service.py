@@ -1,9 +1,7 @@
 # src/dishes/service.py
-import dis
 from sqlalchemy.exc import IntegrityError
 
 from src.dishes.repository import DishRepository
-from src.dishes.model import Dish
 from src.core.exception import (
     NotFoundException,
     AlreadyExistsException,
