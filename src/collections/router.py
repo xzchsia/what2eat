@@ -114,8 +114,8 @@ async def delete_collection(
 )
 async def add_dish_to_collection(
     collection_id: int,
-    dish_id: int,
-    # dish_id: Annotated[int, Depends(get_dish_id)],
+    # dish_id: int,
+    dish_id: Annotated[int, Depends(get_dish_id)],
     service: CollectionService = Depends(get_collection_service),
     current_user: UserRead = Depends(get_current_user),
 ) -> CollectionResponse:

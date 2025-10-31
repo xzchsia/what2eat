@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import Path, Query, Depends
+from fastapi import Path, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.core.database import get_db
@@ -14,7 +14,7 @@ async def validate_dish(dish_id: int, session: AsyncSession) -> None:
     
 
 async def get_dish_id(
-    dish_id: Annotated[int | None, Path(description="使用此 ID 获取菜品，并添加至收藏.")] = None,
+    dish_id: Annotated[int | None, Path(description="使用此 ID 获取菜品，并添加至收藏.")],
     session: AsyncSession = Depends(get_db),    
 ) -> int | None:
     if dish_id is not None:
